@@ -1,5 +1,7 @@
 # NeoServerStats Placeholder
 
+[![Build 1.21.1](https://github.com/DavidBlackCN/NeoServerStats-Placeholder/actions/workflows/build.yml/badge.svg)](https://github.com/DavidBlackCN/NeoServerStats-Placeholder/actions/workflows/build.yml)
+
 纯服务端的 Minecraft 1.21.1 NeoForge mod，通过 **Forge PlaceholderAPI** 暴露服务器与玩家运行时统计。
 
 ---
