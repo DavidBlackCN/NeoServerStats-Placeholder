@@ -6,14 +6,12 @@
 
 ## 环境要求
 
-| 组件 | 版本 |
-| --- | --- |
-| Minecraft | `1.21.1` |
-| NeoForge | `21.1.x`（开发与验证使用 `21.1.250`） |
-| Java | `21` |
-| Forge PlaceholderAPI | `2.1.0`（NeoForge 1.21.1），**必需** |
-
-**仅服务端**：入口标注 `@Mod(dist = Dist.DEDICATED_SERVER)`，所有依赖声明为 `side="SERVER"`，客户端不加载也无需安装。
+| 组件                 | 版本                                         |
+| -------------------- | -------------------------------------------- |
+| Minecraft            | `1.21.1`                                   |
+| NeoForge             | `21.1.x`（开发与验证使用 `21.1.250`）    |
+| Java                 | `21`                                       |
+| [Forge PlaceholderAPI](https://github.com/EnvyWare/ForgePlaceholderAPI) | `2.1.0`（NeoForge 1.21.1），**必需** |
 
 ## 安装
 
@@ -40,40 +38,40 @@
 
 ## 服务器占位符（14 个）
 
-| 占位符 | 说明 | 示例输出 |
-| --- | --- | --- |
-| `%server_version%` | Minecraft 版本 | `1.21.1` |
-| `%server_online%` | 当前在线人数 | `12` |
-| `%server_max_players%` | 配置的人数上限 | `20` |
-| `%server_players_list%` | 在线玩家名，逗号分隔；无人在线为空串 | `Alice, Bob, Steve` |
-| `%server_uptime%` | 本次实例已运行时长 | `4h 23m` |
-| `%server_motd%` | MOTD 纯文本（已剥离 `§` 颜色代码） | `NeoServerStats Dev Server` |
-| `%server_tps%` | 平滑 TPS，范围 `0.00 ~ 20.00` | `19.98` |
-| `%server_mspt%` | 每 tick 平均毫秒（原版 100 tick 滚动窗口） | `12.43` |
-| `%server_cpu_process%` | JVM 进程 CPU 占用 | `37.4%` |
-| `%server_cpu_system%` | 宿主系统 CPU 占用 | `61.8%` |
-| `%server_memory_used%` | JVM 堆已用 | `3.42 GiB` |
-| `%server_memory_committed%` | JVM 堆已提交 | `4.00 GiB` |
-| `%server_memory_max%` | JVM 最大堆（未定义则 `N/A`） | `11.84 GiB` |
-| `%server_memory_percent%` | 已用堆占最大堆百分比 | `42.7%` |
+| 占位符                        | 说明                                       | 示例输出                      |
+| ----------------------------- | ------------------------------------------ | ----------------------------- |
+| `%server_version%`          | Minecraft 版本                             | `1.21.1`                    |
+| `%server_online%`           | 当前在线人数                               | `12`                        |
+| `%server_max_players%`      | 配置的人数上限                             | `20`                        |
+| `%server_players_list%`     | 在线玩家名，逗号分隔；无人在线为空串       | `Alice, Bob, Steve`         |
+| `%server_uptime%`           | 本次实例已运行时长                         | `4h 23m`                    |
+| `%server_motd%`             | MOTD 纯文本（已剥离`§` 颜色代码）       | `NeoServerStats Dev Server` |
+| `%server_tps%`              | 平滑 TPS，范围`0.00 ~ 20.00`             | `19.98`                     |
+| `%server_mspt%`             | 每 tick 平均毫秒（原版 100 tick 滚动窗口） | `12.43`                     |
+| `%server_cpu_process%`      | JVM 进程 CPU 占用                          | `37.4%`                     |
+| `%server_cpu_system%`       | 宿主系统 CPU 占用                          | `61.8%`                     |
+| `%server_memory_used%`      | JVM 堆已用                                 | `3.42 GiB`                  |
+| `%server_memory_committed%` | JVM 堆已提交                               | `4.00 GiB`                  |
+| `%server_memory_max%`       | JVM 最大堆（未定义则`N/A`）              | `11.84 GiB`                 |
+| `%server_memory_percent%`   | 已用堆占最大堆百分比                       | `42.7%`                     |
 
 ## 玩家占位符（13 个）
 
 以下占位符均需玩家上下文，否则返回 `N/A`。
 
-| 占位符 | 说明 | 示例输出 |
-| --- | --- | --- |
-| `%player_name%` | 玩家账号名 | `Alice` |
-| `%player_uuid%` | UUID（标准带连字符格式） | `069a79f4-44e9-4726-a5be-fca90e38aaf5` |
-| `%player_ping%` | 延迟毫秒数（与原版玩家列表一致） | `43` |
-| `%player_dimension%` | 所在维度 | `minecraft:overworld` |
-| `%player_x%` / `%player_y%` / `%player_z%` | 坐标，固定两位小数 | `273.50` |
-| `%player_deaths%` | 原版死亡统计 | `27` |
-| `%player_playtime%` | 原版累计游戏时长，可读格式 | `4d 12h 35m` |
-| `%player_playtime_ticks%` | 原版累计时长原始 ticks | `7812345` |
-| `%player_playtime_seconds%` | 累计时长秒数 | `390617` |
-| `%player_playtime_hours%` | 累计时长小时数，两位小数 | `108.58` |
-| `%player_session_time%` | 本次登录会话时长 | `2h 17m 33s` |
+| 占位符                                           | 说明                             | 示例输出                                 |
+| ------------------------------------------------ | -------------------------------- | ---------------------------------------- |
+| `%player_name%`                                | 玩家账号名                       | `Alice`                                |
+| `%player_uuid%`                                | UUID（标准带连字符格式）         | `069a79f4-44e9-4726-a5be-fca90e38aaf5` |
+| `%player_ping%`                                | 延迟毫秒数（与原版玩家列表一致） | `43`                                   |
+| `%player_dimension%`                           | 所在维度                         | `minecraft:overworld`                  |
+| `%player_x%` / `%player_y%` / `%player_z%` | 坐标，固定两位小数               | `273.50`                               |
+| `%player_deaths%`                              | 原版死亡统计                     | `27`                                   |
+| `%player_playtime%`                            | 原版累计游戏时长，可读格式       | `4d 12h 35m`                           |
+| `%player_playtime_ticks%`                      | 原版累计时长原始 ticks           | `7812345`                              |
+| `%player_playtime_seconds%`                    | 累计时长秒数                     | `390617`                               |
+| `%player_playtime_hours%`                      | 累计时长小时数，两位小数         | `108.58`                               |
+| `%player_session_time%`                        | 本次登录会话时长                 | `2h 17m 33s`                           |
 
 ---
 
@@ -83,12 +81,12 @@
 
 `%server_uptime%` 与 `%player_playtime%`：
 
-| 时长 | 输出 |
-| --- | --- |
-| 不足 1 分钟 | `42s` |
-| 不足 1 小时 | `18m 07s` |
-| 不足 1 天 | `4h 23m` |
-| 1 天及以上 | `3d 08h 15m` |
+| 时长        | 输出           |
+| ----------- | -------------- |
+| 不足 1 分钟 | `42s`        |
+| 不足 1 小时 | `18m 07s`    |
+| 不足 1 天   | `4h 23m`     |
+| 1 天及以上  | `3d 08h 15m` |
 
 `%player_session_time%`（始终带秒）：`33s`、`17m 33s`、`2h 17m 33s`、`1d 02h 17m 33s`。
 
@@ -156,11 +154,7 @@ Forge PlaceholderAPI 自带的 `/placeholderapi` 只能列出命名空间描述�
 .\gradlew.bat runServer
 ```
 
-开发服务器运行在 `run/`（已被 git 忽略），首次运行需接受 EULA：
-
-```text
-run/eula.txt  ->  eula=true
-```
+开发服务器运行在 `run/`（已被 git 忽略），首次运行需接受 EULA。
 
 Forge PlaceholderAPI 通过 `localRuntime` 自动加入开发运行，无需手动拷贝 jar。
 
