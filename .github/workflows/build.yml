@@ -1,25 +1,64 @@
-name: Build
+name: Build 1.21.1
 
-on: [push, pull_request]
+# Only build when actual source / build configuration changes.
+# Documentation-only changes (README.md, LICENSE, .gitignore, ...) do not trigger a build,
+# because this workflow uses an allow-list of paths instead of running on every change.
+on:
+  push:
+    branches: ["*"]
+    paths:
+      - "src/**"
+      - "gradle/**"
+      - "*.gradle"
+      - "gradle.properties"
+      - "gradlew"
+      - "gradlew.bat"
+      - ".github/workflows/**"
+  pull_request:
+    branches: ["*"]
+    paths:
+      - "src/**"
+      - "gradle/**"
+      - "*.gradle"
+      - "gradle.properties"
+      - "gradlew"
+      - "gradlew.bat"
+      - ".github/workflows/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          fetch-tags: true
 
-      - name: Setup JDK 21
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
-          java-version: '21'
-          distribution: 'temurin'
+          distribution: temurin
+          java-version: "21"
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Build with Gradle
-        run: ./gradlew build
+      - name: Make Gradle Wrapper executable
+        run: chmod +x gradlew
+
+      - name: Build NeoForge mod
+        run: ./gradlew clean build --no-daemon --console=plain
+
+      - name: Upload built mod jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: neoserverstats-placeholder-1.21.1-${{ github.sha }}
+          if-no-files-found: error
+          retention-days: 14
+          path: build/libs/*.jar
