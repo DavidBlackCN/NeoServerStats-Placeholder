@@ -27,11 +27,17 @@ sourceSets.main.resources {
 }
 
 repositories {
-    // Add here additional repositories if required by some of the dependencies below.
+    // Forge PlaceholderAPI (EnvyWare) is not on Maven Central. This is the public Maven repository
+    // that the ForgePlaceholderAPI build itself publishes to and resolves from.
+    maven {
+        name = 'EnvyWare'
+        url = 'https://maven.envyware.co.uk/releases'
+    }
 }
 
 base {
-    archivesName = mod_id
+    // Release artifact: build/libs/neoserverstats-placeholder-neoforge-1.21.1-<version>.jar
+    archivesName = "neoserverstats-placeholder-neoforge-${minecraft_version}"
 }
 
 // Mojang ships Java 21 to end users in 1.21.1, so mods should target Java 21.
@@ -49,51 +55,16 @@ neoForge {
     // This line is optional. Access Transformers are automatically detected
     // accessTransformers = project.files('src/main/resources/META-INF/accesstransformer.cfg')
 
-    // Default run configurations.
-    // These can be tweaked, removed, or duplicated as needed.
+    // Server-only project: there is deliberately no client run configuration and no client entry point.
     runs {
-        client {
-            client()
-            // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
-            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
-        }
-
         server {
             server()
             programArgument '--nogui'
-            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
 
-        // This run config launches GameTestServer and runs all registered gametests, then exits.
-        // By default, the server will crash when no gametests are provided.
-        // The gametest system is also enabled by default for other run configs under the /test command.
-        gameTestServer {
-            type = "gameTestServer"
-            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
-        }
-
-        data {
-            data()
-            // example of overriding the workingDirectory set in configureEach above, uncomment if you want to use it
-            // gameDirectory = project.file('run-data')
-
-            // Specify the modid for data generation, where to output the resulting resource, and where to look for existing resources.
-            programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
-        }
-
-        // applies to all the run configs above
         configureEach {
-            // Recommended logging data for a userdev environment
-            // The markers can be added/remove as needed separated by commas.
-            // "SCAN": For mods scan.
-            // "REGISTRIES": For firing of registry events.
-            // "REGISTRYDUMP": For getting the contents of all registries.
-            systemProperty 'forge.logging.markers', 'REGISTRIES'
-
-            // Recommended logging level for the console
-            // You can set various levels here.
-            // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
-            logLevel = org.slf4j.event.Level.DEBUG
+            // Keep the dev console at INFO so that mod loading / placeholder registration is readable.
+            logLevel = org.slf4j.event.Level.INFO
         }
     }
 
@@ -116,41 +87,42 @@ configurations {
 }
 
 dependencies {
-    // Example optional mod dependency with JEI
-    // The JEI API is declared for compile time use, while the full JEI artifact is used at runtime
-    // compileOnly "mezz.jei:jei-${mc_version}-common-api:${jei_version}"
-    // compileOnly "mezz.jei:jei-${mc_version}-neoforge-api:${jei_version}"
-    // We add the full version to localRuntime, not runtimeOnly, so that we do not publish a dependency on it
-    // localRuntime "mezz.jei:jei-${mc_version}-neoforge:${jei_version}"
+    // ---------------------------------------------------------------------------------------------
+    // Forge PlaceholderAPI 2.1.0 (EnvyWare) — NeoForge 1.21.1
+    //
+    // The upstream release is a single shadow/fat jar. Its build (neo21/build.gradle) does
+    // `shadow project(':api')`, so the public API classes under `com.envyful.papi.api.*` are shipped
+    // unrelocated inside the mod jar and are also published separately as `com.envyful.papi:api`.
+    //
+    // Compiling against the small `api` artifact keeps the compile classpath honest and avoids
+    // resolving the fat jar's bundled (relocated) third-party libraries. `transitive = false` is
+    // correct here: the classes we use only need Guava, which Minecraft already provides.
+    // ---------------------------------------------------------------------------------------------
+    compileOnly("com.envyful.papi:api:${forge_placeholder_api_version}") {
+        transitive = false
+    }
 
-    // Example mod dependency using a mod jar from ./libs with a flat dir repository
-    // This maps to ./libs/coolmod-${mc_version}-${coolmod_version}.jar
-    // The group id is ignored when searching -- in this case, it is "blank"
-    // implementation "blank:coolmod-${mc_version}:${coolmod_version}"
-
-    // Example mod dependency using a file as dependency
-    // implementation files("libs/coolmod-${mc_version}-${coolmod_version}.jar")
-
-    // Example project dependency using a sister or child project:
-    // implementation project(":myproject")
-
-    // For more info:
-    // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
-    // http://www.gradle.org/docs/current/userguide/dependency_management.html
+    // Development runs only: the actual Forge PlaceholderAPI mod jar, so that a dev dedicated server
+    // loads it. `localRuntime` is used instead of `runtimeOnly` so that this is never published as a
+    // dependency of this mod, and the jar is never bundled/shaded into our artifact.
+    localRuntime("com.envyful.papi:neo21:${forge_placeholder_api_version}") {
+        transitive = false
+    }
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.
 // A missing property will result in an error. Properties are expanded using ${} Groovy notation.
 var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {
     var replaceProperties = [
-            minecraft_version      : minecraft_version,
-            minecraft_version_range: minecraft_version_range,
-            neo_version            : neo_version,
-            loader_version_range   : loader_version_range,
-            mod_id                 : mod_id,
-            mod_name               : mod_name,
-            mod_license            : mod_license,
-            mod_version            : mod_version,
+            minecraft_version          : minecraft_version,
+            minecraft_version_range    : minecraft_version_range,
+            neo_version                : neo_version,
+            loader_version_range       : loader_version_range,
+            mod_id                     : mod_id,
+            mod_name                   : mod_name,
+            mod_license                : mod_license,
+            mod_version                : mod_version,
+            forge_placeholder_api_range: forge_placeholder_api_range,
     ]
     inputs.properties replaceProperties
     expand replaceProperties
