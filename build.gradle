@@ -78,6 +78,16 @@ neoForge {
     }
 }
 
+// ModDevGradle's run task is a Gradle JavaExec, which does NOT forward the terminal's stdin by
+// default. Without this, `gradlew runServer` starts a server whose console silently ignores every
+// keystroke, so commands (and `stop`) can never be entered and the only way out is killing the
+// process. Forwarding stdin makes the --nogui console work as expected.
+tasks.matching { it.name == 'runServer' }.configureEach { runTask ->
+    if (runTask instanceof JavaExec) {
+        runTask.standardInput = System.in
+    }
+}
+
 // Sets up a dependency configuration called 'localRuntime'.
 // This configuration should be used instead of 'runtimeOnly' to declare
 // a dependency that will be present for runtime testing but that is
