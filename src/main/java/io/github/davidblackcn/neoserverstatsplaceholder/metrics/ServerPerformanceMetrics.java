@@ -34,11 +34,7 @@ public final class ServerPerformanceMetrics {
     /**
      * Reads the current tick timing.
      *
-     * <p>The two values are plain field reads on the server (a {@code long} running sum, an
-     * {@code int} tick count and a {@code float} tick rate). They are not volatile, so a concurrent
-     * read of a value being updated could in principle be inconsistent; the tick duration is only
-     * ever a few hundred thousand nanoseconds, so the worst case is a momentarily odd figure and
-     * never an exception. Like all server state in this mod, this is treated as server-thread state.
+     * Called only by the server-thread snapshot publisher; consumers read its cached strings.
      *
      * @return the current timings, or {@link TickTiming#UNAVAILABLE} before the first tick is
      *         measured

@@ -1,0 +1,43 @@
+// Official optional-consumer artifacts, used only for compiling adapters / opt-in dev runs.
+// SHA-256 pins prevent silent upstream changes. These jars are never shaded or published with us.
+abstract class FetchCompatJar extends DefaultTask {
+    @Input abstract Property<String> getDownloadUrl()
+    @Input abstract Property<String> getSha256()
+    @OutputFile abstract RegularFileProperty getDestination()
+    @TaskAction void fetch() {
+        def file = destination.get().asFile
+        def digest = { byte[] bytes -> java.security.MessageDigest.getInstance('SHA-256').digest(bytes).encodeHex().toString() }
+        if (file.isFile() && digest(file.bytes).equalsIgnoreCase(sha256.get())) return
+        def client = java.net.http.HttpClient.newBuilder().followRedirects(java.net.http.HttpClient.Redirect.ALWAYS)
+                .connectTimeout(java.time.Duration.ofSeconds(30)).build()
+        def request = java.net.http.HttpRequest.newBuilder(java.net.URI.create(downloadUrl.get()))
+                .timeout(java.time.Duration.ofMinutes(2)).GET().build()
+        def response = client.send(request, java.net.http.HttpResponse.BodyHandlers.ofByteArray())
+        if (response.statusCode() != 200 || !digest(response.body()).equalsIgnoreCase(sha256.get())) {
+            throw new GradleException("Optional API artifact download/hash verification failed: ${downloadUrl.get()}")
+        }
+        file.parentFile.mkdirs()
+        file.bytes = response.body()
+    }
+}
+
+def tabJar = tasks.register('fetchTabApi', FetchCompatJar) {
+    downloadUrl = 'https://mediafilez.forgecdn.net/files/6556/999/TAB%20v5.2.1%201.20.5%20-%201.21.1.jar'
+    sha256 = '8feb9436d8cb9e19d283f5c8d47b4235d3ab45eecf37794809176860b7e7ea42'
+    destination = layout.buildDirectory.file('compat/tab-5.2.1.jar')
+}
+def easybotJar = tasks.register('fetchEasyBotApi', FetchCompatJar) {
+    downloadUrl = 'https://files.inectar.cn/d/easybot_mods/neoforge/0.3.3/easybot-neoforge-0.3.3%2Bmc1.21%2B5.jar'
+    sha256 = 'd96a7af10fcf6036294c5222634b58cb33c6f8a538db6de795202383c9777713'
+    destination = layout.buildDirectory.file('compat/easybot-0.3.3.jar')
+}
+
+dependencies {
+    compileOnly files(tabJar, easybotJar)
+    testRuntimeOnly files(tabJar, easybotJar)
+    if (providers.gradleProperty('withTab').map { it.toBoolean() }.getOrElse(false)) localRuntime files(tabJar)
+    if (providers.gradleProperty('withEasyBot').map { it.toBoolean() }.getOrElse(false)) localRuntime files(easybotJar)
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.11.4'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+tasks.named('test') { useJUnitPlatform() }

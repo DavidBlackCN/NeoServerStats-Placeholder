@@ -41,7 +41,3 @@ repo/
 
 ### Local development scratch (dependency/API inspection helpers, logs) ###
 .devtools/
-
-### Documentation ###
-AGENTS.md
-PLAN.md

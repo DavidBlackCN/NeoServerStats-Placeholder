@@ -27,6 +27,7 @@ sourceSets.main.resources {
 }
 
 repositories {
+    mavenCentral()
     // Forge PlaceholderAPI (EnvyWare) is not on Maven Central. This is the public Maven repository
     // that the ForgePlaceholderAPI build itself publishes to and resolves from.
     maven {
@@ -170,3 +171,5 @@ idea {
         downloadJavadoc = true
     }
 }
+
+apply from: "gradle/compat-dependencies.gradle"

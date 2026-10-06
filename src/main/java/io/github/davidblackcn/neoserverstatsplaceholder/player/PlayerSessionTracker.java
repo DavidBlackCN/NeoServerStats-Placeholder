@@ -2,7 +2,7 @@ package io.github.davidblackcn.neoserverstatsplaceholder.player;
 
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.HashMap;
 
 /**
  * Tracks when each online player's current session started.
@@ -14,10 +14,10 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * <p>Unusual disconnects are safe by construction: a stale entry is simply overwritten when the same
  * player logs in again, and the map can never grow beyond the set of players that are currently
- * online (plus anything leaked by a missed logout event, which the next login or server stop clears).
+ * online (missed logout events are also cleaned by the snapshot publisher).
  *
- * <p>{@link ConcurrentHashMap} is used because login and logout run on the server thread while a
- * placeholder may be resolved from a consumer thread. Values are {@link System#nanoTime()} readings,
+ * <p>Only the server thread accesses this tracker; consumers read the published string snapshot.
+ * Values are {@link System#nanoTime()} readings,
  * which are monotonic and unaffected by system clock changes.
  */
 public final class PlayerSessionTracker {
@@ -27,7 +27,7 @@ public final class PlayerSessionTracker {
     /** Returned when the player has no active session. */
     public static final long NO_SESSION = -1L;
 
-    private final Map<UUID, Long> sessionStartNanos = new ConcurrentHashMap<>();
+    private final Map<UUID, Long> sessionStartNanos = new HashMap<>();
 
     /** Starts or restarts the session of a player who just logged in. */
     public void onLogin(UUID playerId) {
@@ -42,6 +42,11 @@ public final class PlayerSessionTracker {
     /** Drops all session state, so nothing leaks into a later server instance. */
     public void clear() {
         this.sessionStartNanos.clear();
+    }
+
+    /** Bounds memory even if a consumer or unusual disconnect caused the logout event to be missed. */
+    public void retainOnline(java.util.Set<UUID> onlineIds) {
+        this.sessionStartNanos.keySet().retainAll(onlineIds);
     }
 
     /** {@return elapsed seconds of the player's current session, or {@link #NO_SESSION} when none} */

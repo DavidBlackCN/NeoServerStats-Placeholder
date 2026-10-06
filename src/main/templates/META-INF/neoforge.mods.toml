@@ -32,7 +32,7 @@ Server-only mod. Provides no client features, no GUI, no commands beyond a place
 [[dependencies.${mod_id}]]
 modId="neoforge"
 type="required"
-versionRange="[${neo_version},)"
+versionRange="[${neo_version},21.2)"
 ordering="NONE"
 side="SERVER"
 
@@ -52,5 +52,20 @@ side="SERVER"
 modId="forgeplaceholderapi"
 type="required"
 versionRange="${forge_placeholder_api_range}"
+ordering="AFTER"
+side="SERVER"
+
+# Broad optional ranges let other consumer versions boot; adapters enforce exact tested versions.
+[[dependencies.${mod_id}]]
+modId="tab"
+type="optional"
+versionRange="[0,)"
+ordering="AFTER"
+side="SERVER"
+
+[[dependencies.${mod_id}]]
+modId="easybot"
+type="optional"
+versionRange="[0,)"
 ordering="AFTER"
 side="SERVER"

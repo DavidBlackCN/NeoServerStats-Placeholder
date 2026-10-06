@@ -8,7 +8,7 @@ import com.envyful.papi.api.util.UtilPlaceholder;
 import net.minecraft.server.level.ServerPlayer;
 
 /**
- * The only class of this mod that touches Forge PlaceholderAPI directly.
+ * Verified Forge PlaceholderAPI registration and evaluation entry points.
  *
  * <p>Everything used here was verified against Forge PlaceholderAPI 2.1.0 for NeoForge 1.21.1
  * (Maven artifact {@code com.envyful.papi:neo21:2.1.0}, released jar
@@ -41,6 +41,7 @@ public final class ForgePlaceholderApiCompat {
 
     /** Mod id of Forge PlaceholderAPI, as declared in its own {@code META-INF/neoforge.mods.toml}. */
     public static final String MOD_ID = "forgeplaceholderapi";
+    private static final Object NO_PLAYER_CONTEXT = new Object();
 
     private ForgePlaceholderApiCompat() {}
 
@@ -65,12 +66,13 @@ public final class ForgePlaceholderApiCompat {
     /**
      * Resolves the placeholders contained in {@code text}, exactly the way a real consumer does.
      *
-     * <p>{@code context} must not be {@code null}: Forge PlaceholderAPI inspects the runtime class of
+     * <p>The upstream utility must not receive {@code null}: it inspects the runtime class of
      * the context object to choose between its player and non-player resolution paths, and dereferences
      * it unconditionally. A dedicated-server object that is not a {@link ServerPlayer} (for example a
-     * command source or the server itself) takes the non-player path.
+     * command source or the server itself) takes the non-player path. This wrapper converts null to
+     * an opaque non-player context, so missing player context still resolves safely to N/A.
      */
     public static String evaluatePlaceholders(Object context, String text) {
-        return UtilPlaceholder.replaceIdentifiers(context, text);
+        return UtilPlaceholder.replaceIdentifiers(context == null ? NO_PLAYER_CONTEXT : context, text);
     }
 }

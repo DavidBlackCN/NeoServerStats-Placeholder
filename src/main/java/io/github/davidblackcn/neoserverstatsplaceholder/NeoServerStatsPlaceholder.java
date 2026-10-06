@@ -5,6 +5,13 @@ import com.mojang.logging.LogUtils;
 import io.github.davidblackcn.neoserverstatsplaceholder.command.PlaceholderDebugCommand;
 import io.github.davidblackcn.neoserverstatsplaceholder.compat.ForgePlaceholderApiCompat;
 import io.github.davidblackcn.neoserverstatsplaceholder.placeholder.PlaceholderRegistrar;
+import io.github.davidblackcn.neoserverstatsplaceholder.placeholder.PlaceholderSnapshots;
+import io.github.davidblackcn.neoserverstatsplaceholder.metrics.RuntimeSnapshotService;
+import net.minecraft.server.level.ServerPlayer;
+import io.github.davidblackcn.neoserverstatsplaceholder.compat.OptionalIntegrations;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.ModContainer;
@@ -33,24 +40,32 @@ public final class NeoServerStatsPlaceholder {
     public static final Logger LOGGER = LogUtils.getLogger();
 
     private final PlaceholderRegistrar registrar;
+    private final PlaceholderSnapshots snapshots = new PlaceholderSnapshots();
+    private final RuntimeSnapshotService metrics = new RuntimeSnapshotService(snapshots);
+    private final OptionalIntegrations integrations = new OptionalIntegrations(snapshots, LOGGER);
 
     /**
      * FML injects the constructor arguments it knows about ({@code IEventBus}, {@code ModContainer},
-     * {@code FMLModContainer}, {@code Dist}); only the mod container is needed here.
+     * {@code FMLModContainer}, {@code Dist}); the bus schedules optional adapters after mod loading.
      */
-    public NeoServerStatsPlaceholder(ModContainer modContainer) {
+    public NeoServerStatsPlaceholder(ModContainer modContainer, IEventBus modBus) {
         String modVersion = modContainer.getModInfo().getVersion().toString();
 
         // Forge PlaceholderAPI keeps a static registry with no lifecycle event of its own, so
         // registering during mod construction is the correct and simplest hook point.
-        this.registrar = new PlaceholderRegistrar(LOGGER, modVersion);
+        this.registrar = new PlaceholderRegistrar(snapshots, LOGGER, modVersion);
         this.registrar.registerAll();
+        modBus.addListener(FMLCommonSetupEvent.class, event -> event.enqueueWork(integrations::setup));
+        if (!metrics.hasCpuSupport()) {
+            LOGGER.warn("Extended CPU management bean unavailable; CPU placeholders return N/A");
+        }
 
         NeoForge.EVENT_BUS.addListener(RegisterCommandsEvent.class, this::onRegisterCommands);
         NeoForge.EVENT_BUS.addListener(ServerStartedEvent.class, this::onServerStarted);
         NeoForge.EVENT_BUS.addListener(ServerStoppingEvent.class, this::onServerStopping);
         NeoForge.EVENT_BUS.addListener(PlayerEvent.PlayerLoggedInEvent.class, this::onPlayerLoggedIn);
         NeoForge.EVENT_BUS.addListener(PlayerEvent.PlayerLoggedOutEvent.class, this::onPlayerLoggedOut);
+        NeoForge.EVENT_BUS.addListener(ServerTickEvent.Post.class, event -> metrics.tick(event.getServer()));
     }
 
     private void onRegisterCommands(RegisterCommandsEvent event) {
@@ -58,20 +73,22 @@ public final class NeoServerStatsPlaceholder {
     }
 
     private void onServerStarted(ServerStartedEvent event) {
-        this.registrar.onServerStarted();
+        this.metrics.start(event.getServer());
+        integrations.start();
         this.logSelfCheck(event);
     }
 
     private void onServerStopping(ServerStoppingEvent event) {
-        this.registrar.onServerStopping();
+        integrations.stop();
+        this.metrics.stop();
     }
 
     private void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
-        this.registrar.onPlayerLoggedIn(event.getEntity().getUUID());
+        if (event.getEntity() instanceof ServerPlayer player) metrics.login(player);
     }
 
     private void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
-        this.registrar.onPlayerLoggedOut(event.getEntity().getUUID());
+        if (event.getEntity() instanceof ServerPlayer player) metrics.logout(player);
     }
 
     /**
