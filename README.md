@@ -1,4 +1,4 @@
-# NeoServerStats Placeholder 0.2.0
+# NeoServerStats Placeholder 0.2.1
 
 Minecraft 1.21.1 NeoForge 专用服占位符 mod，内置 30 个服务器变量与 44 个玩家变量。变量名参考 [Player 2.0.9](https://ecloud.placeholderapi.com/expansions/player/) 和 [Server 2.7.3](https://ecloud.placeholderapi.com/expansions/server/)，在 NeoForge 上重新实现。
 
@@ -8,7 +8,7 @@ Minecraft 1.21.1 NeoForge 专用服占位符 mod，内置 30 个服务器变量�
 | --- | --- |
 | Java | 21 |
 | Minecraft | 1.21.1 |
-| NeoForge | `[21.1.250,21.2)`，验证基线 21.1.250 |
+| NeoForge | `[21.1.249,21.2)`，默认编译基线 21.1.249；验证 21.1.249 / 21.1.250 |
 | [Forge PlaceholderAPI](https://github.com/EnvyWare/ForgePlaceholderAPI) | 必需，NeoForge 1.21.1 的 2.1.0 发行物 |
 | [TAB](https://www.curseforge.com/minecraft/mc-mods/tab/files/6556999) | 可选，5.2.1 的 `1.20.5 - 1.21.1` 发行物 |
 | [EasyBot](https://files.inectar.cn/easybot_mods/neoforge/0.3.3) | 可选，0.3.3 的 `mc1.21+5` 发行物 |
@@ -166,11 +166,13 @@ OP（权限等级 2）调试命令：
 .\gradlew.bat runServer -PwithTab=true
 .\gradlew.bat runServer -PwithEasyBot=true
 .\gradlew.bat runServer -PwithTab=true -PwithEasyBot=true
+.\gradlew.bat clean build -Pneo_version=21.1.250
+.\gradlew.bat runServer -Pneo_version=21.1.250
 ```
 
 Unix 使用 `./gradlew`。首次构建从 EnvyWare Maven 获取 FPAPI API，从官方发行地址下载精确 TAB / EasyBot API JAR 到 `build/compat/` 并校验 SHA-256。二者为 compileOnly，仅显式开发运行参数添加 localRuntime。不提交下载二进制，不 shade，不发布依赖 JAR。JUnit 仅用于开发测试。
 
-产物：`build/libs/neoserverstats-placeholder-neoforge-1.21.1-0.2.0.jar`。源码固定 UTF-8；Gradle 使用 COMPAT 解决 Windows 中文路径 worker 参数编码问题，见 [Gradle 已知问题](https://github.com/gradle/gradle/issues/30391)。
+产物：`build/libs/neoserverstats-placeholder-neoforge-1.21.1-0.2.1.jar`。默认使用 NeoForge 21.1.249 编译；`-Pneo_version` 可选择验证版本，不改变发布 JAR 声明的支持范围。GitHub Actions 分别在 21.1.249 / 21.1.250 上构建与执行测试。源码固定 UTF-8；Gradle 使用 COMPAT 解决 Windows 中文路径 worker 参数编码问题，见 [Gradle 已知问题](https://github.com/gradle/gradle/issues/30391)。
 
 ## 验证
 

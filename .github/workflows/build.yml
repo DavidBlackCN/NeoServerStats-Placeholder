@@ -36,6 +36,9 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        neoforge: ["21.1.249", "21.1.250"]
 
     steps:
       - uses: actions/checkout@v4
@@ -52,13 +55,13 @@ jobs:
       - name: Make Gradle Wrapper executable
         run: chmod +x gradlew
 
-      - name: Build NeoForge mod
-        run: ./gradlew clean build --no-daemon --console=plain
+      - name: Build with NeoForge ${{ matrix.neoforge }}
+        run: ./gradlew clean build -Pneo_version=${{ matrix.neoforge }} --no-daemon --console=plain
 
       - name: Upload built mod jar
         uses: actions/upload-artifact@v4
         with:
-          name: neoserverstats-placeholder-1.21.1-${{ github.sha }}
+          name: neoserverstats-placeholder-1.21.1-neoforge-${{ matrix.neoforge }}-${{ github.sha }}
           if-no-files-found: error
           retention-days: 14
           path: build/libs/*.jar

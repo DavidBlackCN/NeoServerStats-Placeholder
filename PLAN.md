@@ -1,10 +1,10 @@
-# NeoServerStats Placeholder — 0.2.0 实施计划
+# NeoServerStats Placeholder — 0.2.1 实施计划
 
 ## 目标与固定环境
 
 提供 Player / Server 常用占位符，保持 eCloud Player 2.0.9、Server 2.7.3 的键名和默认格式，并内置 NeoForge TAB / EasyBot 适配。只实现 README 列出的 74 个变量（30 server、44 player），不是完整 Bukkit PlaceholderAPI 或 eCloud JAR 加载器。
 
-固定 Java 21、Minecraft 1.21.1、NeoForge 21.1.250，元数据 NeoForge 范围 `[21.1.250,21.2)`。标准专用服 mod JAR，mod id `neoserverstats_placeholder`，版本 `0.2.0`。必需依赖 Forge PlaceholderAPI 2.1.0 的 NeoForge 1.21.1 发行物；不引入 Bukkit、数据库、网络查询、客户端代码或新 mixin，不打包依赖 JAR。
+固定 Java 21、Minecraft 1.21.1，默认以最低支持版本 NeoForge 21.1.249 编译，并在 21.1.249 / 21.1.250 验证；元数据 NeoForge 范围 `[21.1.249,21.2)` 独立于构建时选用的版本。标准专用服 mod JAR，mod id `neoserverstats_placeholder`，版本 `0.2.1`。必需依赖 Forge PlaceholderAPI 2.1.0 的 NeoForge 1.21.1 发行物；不引入 Bukkit、数据库、网络查询、客户端代码或新 mixin，不打包依赖 JAR。
 
 ## 兼容契约
 
@@ -54,4 +54,4 @@
 
 ## 当前进度
 
-代码、依赖配置、四种专用服组合、故障隔离、自动测试和发布 JAR 检查均已完成；最终 wrapper clean build 通过。按 VALIDATION.md 的实际版本、路径与公开限制声明兼容。
+0.2.1 已将编译基线和支持下限下移到 21.1.249，CI 对 21.1.249 / 21.1.250 分别构建。两版 wrapper clean build 均通过；21.1.249 四种专用服组合、74 个变量和可选适配复验通过；同一份 21.1.249 编译的发布 JAR 在 21.1.250 联合运行、TAB reload 与停服通过。0.2.0 的详细语义及故障隔离记录保留。按 VALIDATION.md 的实际版本、路径与公开限制声明兼容。
