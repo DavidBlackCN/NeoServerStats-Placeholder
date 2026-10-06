@@ -26,6 +26,16 @@ def tabJar = tasks.register('fetchTabApi', FetchCompatJar) {
     sha256 = '8feb9436d8cb9e19d283f5c8d47b4235d3ab45eecf37794809176860b7e7ea42'
     destination = layout.buildDirectory.file('compat/tab-5.2.1.jar')
 }
+def tab550Jar = tasks.register('fetchTab550', FetchCompatJar) {
+    downloadUrl = 'https://mediafilez.forgecdn.net/files/7659/430/TAB%20v5.5.0%201.20.5%20-%201.21.1.jar'
+    sha256 = 'abadbe8cf11b0736fdf3cdbac22a0518590acd118813983e99a6d16e9b94d985'
+    destination = layout.buildDirectory.file('compat/tab-5.5.0.jar')
+}
+def tabRuntimeVersion = providers.gradleProperty('tab_version').getOrElse('5.5.0')
+def tabRuntimeJars = ['5.2.1': tabJar, '5.5.0': tab550Jar]
+if (!tabRuntimeJars.containsKey(tabRuntimeVersion)) {
+    throw new GradleException("Unsupported TAB development runtime: ${tabRuntimeVersion}; use 5.2.1 or 5.5.0")
+}
 def easybotJar = tasks.register('fetchEasyBotApi', FetchCompatJar) {
     downloadUrl = 'https://files.inectar.cn/d/easybot_mods/neoforge/0.3.3/easybot-neoforge-0.3.3%2Bmc1.21%2B5.jar'
     sha256 = 'd96a7af10fcf6036294c5222634b58cb33c6f8a538db6de795202383c9777713'
@@ -33,9 +43,10 @@ def easybotJar = tasks.register('fetchEasyBotApi', FetchCompatJar) {
 }
 
 dependencies {
+    // Compile against the oldest supported public API; test each pinned release in a dedicated server.
     compileOnly files(tabJar, easybotJar)
     testRuntimeOnly files(tabJar, easybotJar)
-    if (providers.gradleProperty('withTab').map { it.toBoolean() }.getOrElse(false)) localRuntime files(tabJar)
+    if (providers.gradleProperty('withTab').map { it.toBoolean() }.getOrElse(false)) localRuntime files(tabRuntimeJars[tabRuntimeVersion])
     if (providers.gradleProperty('withEasyBot').map { it.toBoolean() }.getOrElse(false)) localRuntime files(easybotJar)
     testImplementation 'org.junit.jupiter:junit-jupiter:5.11.4'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'

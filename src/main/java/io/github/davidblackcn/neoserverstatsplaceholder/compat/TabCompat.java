@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 
-/** TAB 5.2.1 NeoForge has no FPAPI hook. Its public API is available on ServerStartedEvent. */
+/** Verified TAB 5.2.1 / 5.5.0 NeoForge releases need explicit registration on ServerStartedEvent. */
 public final class TabCompat {
     private final PlaceholderSnapshots snapshots;
     private final Logger logger;
@@ -41,7 +41,7 @@ public final class TabCompat {
                 registered.add(manager.registerPlayerPlaceholder("%player_" + key + "%", 250,
                         player -> enabled ? snapshots.resolve("player", key, player.getUniqueId()) : PlaceholderFallback.NOT_AVAILABLE));
             }
-            logger.info("Registered NeoServerStats placeholders with TAB 5.2.1");
+            logger.info("Registered {} NeoServerStats placeholders with TAB", registered.size());
         } catch (RuntimeException | LinkageError error) {
             enabled = false;
             for (Placeholder placeholder : registered) {

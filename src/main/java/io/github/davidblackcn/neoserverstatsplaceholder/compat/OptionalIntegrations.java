@@ -1,6 +1,7 @@
 package io.github.davidblackcn.neoserverstatsplaceholder.compat;
 
 import io.github.davidblackcn.neoserverstatsplaceholder.placeholder.PlaceholderSnapshots;
+import java.util.Arrays;
 import net.neoforged.fml.ModList;
 import org.slf4j.Logger;
 
@@ -23,7 +24,7 @@ public final class OptionalIntegrations {
         }
     }
     public void start() {
-        if (supported("tab", "5.2.1")) {
+        if (supported("tab", "5.2.1", "5.5.0")) {
             try {
                 tab = new TabCompat(snapshots, logger);
                 tab.start();
@@ -40,12 +41,13 @@ public final class OptionalIntegrations {
             tab = null;
         }
     }
-    private boolean supported(String id, String expectedVersion) {
+    private boolean supported(String id, String... expectedVersions) {
         var mod = ModList.get().getModContainerById(id);
         if (mod.isEmpty()) return false;
         String actual = mod.get().getModInfo().getVersion().toString();
-        if (actual.equals(expectedVersion)) return true;
-        logger.warn("{} adapter disabled: verified version is {}, installed version is {}", id, expectedVersion, actual);
+        if (Arrays.asList(expectedVersions).contains(actual)) return true;
+        logger.warn("{} adapter disabled: verified versions are {}, installed version is {}",
+                id, String.join(", ", expectedVersions), actual);
         return false;
     }
 }

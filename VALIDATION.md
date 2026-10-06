@@ -1,4 +1,45 @@
-# 0.2.1 验证记录
+# 0.2.2 验证记录
+
+日期：2026-10-06。Java 21 / Minecraft 1.21.1，新增 TAB 5.5.0 适配，保留 TAB 5.2.1 与 EasyBot 0.3.3 `mc1.21+5`。
+
+## 发行物与 API
+
+检查 [TAB 5.5.0 官方发行物](https://www.curseforge.com/minecraft/mc-mods/tab/files/7659430)，文件为 `TAB v5.5.0 1.20.5 - 1.21.1.jar`，4025747 字节，SHA-256：`abadbe8cf11b0736fdf3cdbac22a0518590acd118813983e99a6d16e9b94d985`。JAR 内 NeoForge mod 元数据为 `tab=5.5.0`，Minecraft 范围包括 1.21.1。
+
+用实际 JAR 的 javap 核对 PlaceholderManager、EventBus、TabPlayer、TabLoadEvent；所用公开签名与 5.2.1 一致。实际 NeoForgePlatform 对未知变量仍注册默认实现，NeoForgeTAB 在 ServerStarting 初始化、ServerStopping 卸载，因此继续使用公开 API，在 ServerStarted 注册并监听 TabLoadEvent 恢复。新增精确允许版本 5.5.0，注册日志显示实际数量；其他未知版本仍跳过。
+
+编译继续使用最低支持版本的 5.2.1 API；`-PwithTab=true` 默认选择固定 SHA-256 的 5.5.0，`-Ptab_version=5.2.1` 可回归旧版。依赖和开发验证工具不进入发布 JAR。
+
+## 专用服验证
+
+均将 21.1.249 编译的同一个 0.2.2 JAR 放入 `mods/`，关闭开发源码绑定，使用真实 Minecraft 1.21.1 协议玩家。
+
+| NeoForge / 安装组合（均含本 mod） | 实际结果 |
+| --- | --- |
+| 21.1.249：仅 FPAPI | 启动、74 项在线解析和停服通过；未安装可选消费方安全 |
+| 21.1.249：FPAPI + TAB 5.5.0 | 74 项注册、250 / 1000 ms 间隔、全部 74 项实际页眉页脚网络值、reload 前后输出及停服通过 |
+| 21.1.249：FPAPI + EasyBot | 74 项自身解析入口与 FPAPI 比对、预映射接管、缺失上下文、未知键及停服通过 |
+| 21.1.249：FPAPI + TAB 5.5.0 + EasyBot | 两个消费方同时工作；74 项比对与网络值、TAB reload 和停服通过 |
+| 21.1.249：FPAPI + TAB 5.2.1 | 同一 JAR 的旧版回归通过；74 项注册与网络值、reload 和停服通过 |
+| 21.1.250：FPAPI + TAB 5.5.0 + EasyBot | 同一份 21.1.249 编译的发布 JAR 回归通过；74 项消费入口比对和网络值、reload、停服正常；server_build 返回 21.1.250 |
+
+TAB 使用 5.5.0 的 `header-footer.designs.default` 配置，包含用户报告的 `%server_tps_5_colored%`、`%server_ram_used%`、`%server_ram_max%`。刷新后的实际网络输出示例：
+
+```text
+NSS TPS: §e17.0 RAM: 409MB / 12128MB
+```
+
+注册和重新注册发生在 TAB 生命周期事件中；验证等待刷新后的完整输出，允许启动预热及重载期间的短暂中间包。EasyBot 沿用本地 ignoreError=true 验证自身解析入口；远端机器人消息和图形客户端截图仍未验证。
+
+## 构建与发布
+
+wrapper `clean build` 和 `clean build -Pneo_version=21.1.250` 均通过；每次执行 8 个 JUnit 测试方法，零失败/错误。两版编译生成的全部 32 个模组类逐字节一致。发布元数据为 0.2.2、NeoForge `[21.1.249,21.2)`，class major 65；JAR 不含依赖、第三方类、测试/验证模组、调试产物或 mixin。
+
+产物 `build/libs/neoserverstats-placeholder-neoforge-1.21.1-0.2.2.jar`，54192 字节，SHA-256：`5c0587e0cf3d3318fd430a3398b64acc076fd07d26dbbf4181fe44a87a11010b`。原始 API 检查输出、协议客户端、验证模组及日志仅留在被忽略的开发目录；验证用服务器配置恢复。
+
+---
+
+# 0.2.1 验证记录（历史）
 
 日期：2026-10-06。沿用下方 Java 21、Minecraft 1.21.1 和精确消费方发行物；新增 NeoForge 21.1.249，保留 21.1.250 兼容。
 

@@ -1,16 +1,16 @@
-# NeoServerStats Placeholder — 0.2.1 实施计划
+# NeoServerStats Placeholder — 0.2.2 实施计划
 
 ## 目标与固定环境
 
 提供 Player / Server 常用占位符，保持 eCloud Player 2.0.9、Server 2.7.3 的键名和默认格式，并内置 NeoForge TAB / EasyBot 适配。只实现 README 列出的 74 个变量（30 server、44 player），不是完整 Bukkit PlaceholderAPI 或 eCloud JAR 加载器。
 
-固定 Java 21、Minecraft 1.21.1，默认以最低支持版本 NeoForge 21.1.249 编译，并在 21.1.249 / 21.1.250 验证；元数据 NeoForge 范围 `[21.1.249,21.2)` 独立于构建时选用的版本。标准专用服 mod JAR，mod id `neoserverstats_placeholder`，版本 `0.2.1`。必需依赖 Forge PlaceholderAPI 2.1.0 的 NeoForge 1.21.1 发行物；不引入 Bukkit、数据库、网络查询、客户端代码或新 mixin，不打包依赖 JAR。
+固定 Java 21、Minecraft 1.21.1，默认以最低支持版本 NeoForge 21.1.249 编译，并在 21.1.249 / 21.1.250 验证；元数据 NeoForge 范围 `[21.1.249,21.2)` 独立于构建时选用的版本。标准专用服 mod JAR，mod id `neoserverstats_placeholder`，版本 `0.2.2`。必需依赖 Forge PlaceholderAPI 2.1.0 的 NeoForge 1.21.1 发行物；不引入 Bukkit、数据库、网络查询、客户端代码或新 mixin，不打包依赖 JAR。
 
 ## 兼容契约
 
 - 其他模组须调用对应解析接口；相同变量名不构成跨 PAPI 实现的自动兼容。
 - Forge PlaceholderAPI 使用真实 2.1.0 API 注册两个 namespace；消费者使用 `%server_key%` / `%player_key%`。
-- TAB 5.2.1 的 `1.20.5 - 1.21.1` 发行物使用公开 registerServerPlaceholder / registerPlayerPlaceholder，在 ServerStarted 注册、TabLoadEvent 后恢复，刷新间隔 server 1000 ms / player 250 ms。
+- TAB 5.2.1 / 5.5.0 的 `1.20.5 - 1.21.1` 发行物使用公开 registerServerPlaceholder / registerPlayerPlaceholder，在 ServerStarted 注册、TabLoadEvent 后恢复，刷新间隔 server 1000 ms / player 250 ms。保持以 5.2.1 API 编译，开发运行默认使用固定 URL / SHA-256 的 5.5.0，可指定 `-Ptab_version=5.2.1` 回归。
 - EasyBot 0.3.3 的 `mc1.21+5` 发行物使用 IPlaceholderHandler 注册 player / server，仅移除已实现键的公开预映射。两个前缀注册成功前，处理器保持不可用；遇到前缀冲突，不删除任何预映射。
 - 可选适配按 mod 元数据精确检查版本，其他版本跳过并告警一次。API 注册失败停用对应适配，FPAPI 核心继续运行。
 - TAB 的公开 API 会覆盖同名注册，也自动创建未知变量默认实现；它没有公开 API 区分这两种提供器。因此本目录变量按明确所有权覆盖，不能承诺识别任意第三方同名冲突；README 明确要求避免争用。无需反射或内部 API 猜测。
@@ -54,4 +54,4 @@
 
 ## 当前进度
 
-0.2.1 已将编译基线和支持下限下移到 21.1.249，CI 对 21.1.249 / 21.1.250 分别构建。两版 wrapper clean build 均通过；21.1.249 四种专用服组合、74 个变量和可选适配复验通过；同一份 21.1.249 编译的发布 JAR 在 21.1.250 联合运行、TAB reload 与停服通过。0.2.0 的详细语义及故障隔离记录保留。按 VALIDATION.md 的实际版本、路径与公开限制声明兼容。
+0.2.2 已检查实际 TAB 5.5.0 发行物/API，将其加入精确允许版本，并保留 5.2.1。NeoForge 21.1.249 / 21.1.250 的 wrapper clean build 均通过；21.1.249 四种专用服组合、TAB 5.2.1 回归及同一发布 JAR 在 21.1.250 联合运行均通过。TAB 全部 74 项实际页眉页脚网络值、用户的 TPS/RAM 变量、reload 前后输出及停服已验证；开发运行默认 TAB 5.5.0。原有详细语义及故障隔离记录保留。按 VALIDATION.md 的实际版本、路径与公开限制声明兼容。

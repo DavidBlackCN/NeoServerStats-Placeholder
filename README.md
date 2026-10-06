@@ -1,4 +1,4 @@
-# NeoServerStats Placeholder 0.2.1
+# NeoServerStats Placeholder 0.2.2
 
 Minecraft 1.21.1 NeoForge 专用服占位符 mod，内置 30 个服务器变量与 44 个玩家变量。变量名参考 [Player 2.0.9](https://ecloud.placeholderapi.com/expansions/player/) 和 [Server 2.7.3](https://ecloud.placeholderapi.com/expansions/server/)，在 NeoForge 上重新实现。
 
@@ -10,7 +10,7 @@ Minecraft 1.21.1 NeoForge 专用服占位符 mod，内置 30 个服务器变量�
 | Minecraft | 1.21.1 |
 | NeoForge | `[21.1.249,21.2)`，默认编译基线 21.1.249；验证 21.1.249 / 21.1.250 |
 | [Forge PlaceholderAPI](https://github.com/EnvyWare/ForgePlaceholderAPI) | 必需，NeoForge 1.21.1 的 2.1.0 发行物 |
-| [TAB](https://www.curseforge.com/minecraft/mc-mods/tab/files/6556999) | 可选，5.2.1 的 `1.20.5 - 1.21.1` 发行物 |
+| TAB | 可选，[5.5.0](https://www.curseforge.com/minecraft/mc-mods/tab/files/7659430) / [5.2.1](https://www.curseforge.com/minecraft/mc-mods/tab/files/6556999) 的 `1.20.5 - 1.21.1` 发行物 |
 | [EasyBot](https://files.inectar.cn/easybot_mods/neoforge/0.3.3) | 可选，0.3.3 的 `mc1.21+5` 发行物 |
 
 将 FPAPI 与本 mod 的 JAR 放入服务器 `mods/`，需要消费方时再添加上述 TAB / EasyBot JAR。依赖不打包在本 mod 中，不安装 Bukkit 的 eCloud 扩展 JAR。客户端不需要安装本 mod；只支持专用服。
@@ -19,7 +19,9 @@ Minecraft 1.21.1 NeoForge 专用服占位符 mod，内置 30 个服务器变量�
 
 TAB 在服务器启动后通过公开 API 注册，`/tab reload` 后通过 `TabLoadEvent` 恢复。玩家刷新间隔 250 ms，服务器 1000 ms。EasyBot 在初始化阶段注册 `player` / `server` 处理器，仅移除本 mod 支持变量对应的公开预映射，使结果与 FPAPI 一致。未知键返回 null，交还 EasyBot；EasyBot 自己已有的其他映射仍可能解析原生变量。
 
-适配按 mod 元数据精确检查 `tab=5.2.1` / `easybot=0.3.3`；构建依赖通过 SHA-256 固定发行物。其他版本跳过适配并告警一次。EasyBot 前缀冲突或 API 注册异常停用对应适配，FPAPI 核心继续工作。TAB 公开注册 API 会替换同名变量，包括未知变量的默认实现；请勿再安装争用这些名称的 TAB 提供器。
+适配按 mod 元数据精确检查 `tab=5.2.1` 或 `5.5.0`、`easybot=0.3.3`；开发依赖通过 SHA-256 固定发行物。其他版本跳过适配并告警一次。EasyBot 前缀冲突或 API 注册异常停用对应适配，FPAPI 核心继续工作。TAB 公开注册 API 会替换同名变量，包括未知变量的默认实现；请勿再安装争用这些名称的 TAB 提供器。
+
+TAB 5.5.0 用户请升级本 mod 至 0.2.2：替换旧 JAR 后重启服务器，原有 `%server_tps_5_colored%`、`%server_ram_used%`、`%server_ram_max%` 等配置无需更名。0.2.0 / 0.2.1 会主动跳过 5.5.0 适配；调试命令能解析只代表 FPAPI 入口正常。
 
 FPAPI 2.1.0 发行物自身元数据仍写着 `2.0.5`，因此元数据依赖范围使用 `[2.0,)`；其他 FPAPI 发行物尚未验证。
 
@@ -164,15 +166,16 @@ OP（权限等级 2）调试命令：
 .\gradlew.bat clean build
 .\gradlew.bat runServer
 .\gradlew.bat runServer -PwithTab=true
+.\gradlew.bat runServer -PwithTab=true -Ptab_version=5.2.1
 .\gradlew.bat runServer -PwithEasyBot=true
 .\gradlew.bat runServer -PwithTab=true -PwithEasyBot=true
 .\gradlew.bat clean build -Pneo_version=21.1.250
 .\gradlew.bat runServer -Pneo_version=21.1.250
 ```
 
-Unix 使用 `./gradlew`。首次构建从 EnvyWare Maven 获取 FPAPI API，从官方发行地址下载精确 TAB / EasyBot API JAR 到 `build/compat/` 并校验 SHA-256。二者为 compileOnly，仅显式开发运行参数添加 localRuntime。不提交下载二进制，不 shade，不发布依赖 JAR。JUnit 仅用于开发测试。
+Unix 使用 `./gradlew`。首次构建从 EnvyWare Maven 获取 FPAPI API，从官方发行地址下载精确 TAB / EasyBot API JAR 到 `build/compat/` 并校验 SHA-256。编译使用最低支持版本 TAB 5.2.1 的公开 API；`-PwithTab=true` 默认运行 TAB 5.5.0，也可用 `-Ptab_version=5.2.1` 回归旧版。可选消费方仅显式开发运行参数添加 localRuntime。不提交下载二进制，不 shade，不发布依赖 JAR。JUnit 仅用于开发测试。
 
-产物：`build/libs/neoserverstats-placeholder-neoforge-1.21.1-0.2.1.jar`。默认使用 NeoForge 21.1.249 编译；`-Pneo_version` 可选择验证版本，不改变发布 JAR 声明的支持范围。GitHub Actions 分别在 21.1.249 / 21.1.250 上构建与执行测试。源码固定 UTF-8；Gradle 使用 COMPAT 解决 Windows 中文路径 worker 参数编码问题，见 [Gradle 已知问题](https://github.com/gradle/gradle/issues/30391)。
+产物：`build/libs/neoserverstats-placeholder-neoforge-1.21.1-0.2.2.jar`。默认使用 NeoForge 21.1.249 编译；`-Pneo_version` 可选择验证版本，不改变发布 JAR 声明的支持范围。GitHub Actions 分别在 21.1.249 / 21.1.250 上构建与执行测试。源码固定 UTF-8；Gradle 使用 COMPAT 解决 Windows 中文路径 worker 参数编码问题，见 [Gradle 已知问题](https://github.com/gradle/gradle/issues/30391)。
 
 ## 验证
 
